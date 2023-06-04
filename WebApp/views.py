@@ -7,7 +7,7 @@ from rest_framework.response import Response
 from rest_framework import status
 
 # Creating API endpoint
-@api_view(['GET', 'POST'])
+@api_view(['GET', 'POST', 'Delete'])
 def Subscribers(request):
 
     # get all the subscriptions
@@ -17,12 +17,22 @@ def Subscribers(request):
         sub = Subscriptions.objects.all()
         serializer = SubSerializer(sub, many=True)
         return Response(serializer.data)
-    
-    if request.method == 'POST':
+        
+    elif request.method == 'POST':
         serializer = SubSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status.HTTP_201_CREATED)
+        if serializer.is_valid(raise_exception=True):
+            email = serializer.validated_data.get("Email",None)
+            is_exist = Subscriptions.objects.filter(Email=email).exists()
+            if is_exist:
+                return Response({"error":"User with email already exist"},status=status.HTTP_400_BAD_REQUEST)
+            else:
+                serializer.save()
+                return Response(serializer.data, status.HTTP_201_CREATED)
+        
+        else:
+            return Response({"Invalid Details"}, status=status.HTTP_400_BAD_REQUEST)
+    else:
+        return Response({"Invalid Request"}, status=status.HTTP_400_BAD_REQUEST)
         
 
 @api_view(['GET', 'PUT', 'DELETE'])
@@ -48,5 +58,19 @@ def SubscribeDetail(request, id):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
+@api_view(['GET', 'POST'])
+def signup(request):
 
+    if request.method == 'GET':
+        sub = Signup.objects.all()
+        serializer = SignupSerializer(sub, many=True)
+        return Response(serializer.data)
+
+    if request.method == 'POST':
+        serializer = SignupSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status.HTTP_201_CREATED)
+        
+    
 # Create your views here.
