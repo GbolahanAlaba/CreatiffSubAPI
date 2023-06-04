@@ -58,19 +58,6 @@ def SubscribeDetail(request, id):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-@api_view(['GET', 'POST'])
-def signup(request):
-
-    if request.method == 'GET':
-        sub = Signup.objects.all()
-        serializer = SignupSerializer(sub, many=True)
-        return Response(serializer.data)
-
-    if request.method == 'POST':
-        serializer = SignupSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status.HTTP_201_CREATED)
         
     
 # Create your views here.
